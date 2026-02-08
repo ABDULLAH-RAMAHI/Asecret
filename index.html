@@ -156,6 +156,52 @@
   }
   .opened .boxGlow{ opacity:1; }
 
+  /* ======= TREASURE FLASH (NEW) ======= */
+  .treasureFlash{
+    position:absolute;
+    inset:-90px;
+    border-radius:50px;
+    background:
+      radial-gradient(circle at center,
+        rgba(255,215,110,.95) 0%,
+        rgba(255,215,110,.65) 22%,
+        rgba(255,215,110,.25) 45%,
+        transparent 72%);
+    opacity:0;
+    pointer-events:none;
+    filter: blur(6px);
+    transition: opacity .7s ease;
+    z-index:25;
+  }
+  .treasureBurst .treasureFlash{ opacity:1; }
+
+  /* sparkles */
+  .sparkles{ position:absolute; inset:0; pointer-events:none; overflow:visible; z-index:26; }
+  .spark{
+    position:absolute;
+    width:10px; height:10px;
+    background:rgba(255,215,110,.95);
+    transform: rotate(45deg);
+    border-radius:2px;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,.18));
+    opacity:0;
+    animation: sparkPop 900ms ease forwards;
+  }
+  .spark:before, .spark:after{
+    content:"";
+    position:absolute;
+    width:10px; height:10px;
+    background:inherit;
+    border-radius:50%;
+  }
+  .spark:before{ left:-5px; top:0; }
+  .spark:after{ left:0; top:-5px; }
+  @keyframes sparkPop{
+    0%{ transform: translate(0,0) rotate(45deg) scale(.7); opacity:0; }
+    15%{ opacity:1; }
+    100%{ transform: translate(var(--dx), var(--dy)) rotate(45deg) scale(1.2); opacity:0; }
+  }
+
   .box{
     position:absolute;
     inset:0;
@@ -351,6 +397,44 @@
   .openedEnv .envelope{ transform: translateY(26px); }
   .openedEnv .letter{ transform: translateY(-10px); opacity:1; z-index:50; }
   .innerOpen .inner{ height: 150px; }
+
+  /* buttons used in your content */
+  .ghost, .primary{
+    padding:10px 14px;
+    border-radius:999px;
+    font-weight:900;
+    border:1px solid rgba(0,0,0,.12);
+    cursor:pointer;
+    box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    transition:.2s ease;
+  }
+  .ghost{ background: rgba(255,255,255,.92); }
+  .primary{ background: linear-gradient(135deg, var(--pink), var(--pink2)); color:#fff; border-color: rgba(255,255,255,.35); }
+  .ghost:hover, .primary:hover{ transform: translateY(-2px); }
+
+  /* ======= NEW: Continue / Mystery choice buttons ======= */
+  .choiceRow{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .choiceBtn{
+    padding:10px 14px;
+    border-radius:999px;
+    font-weight:900;
+    border:1px solid rgba(0,0,0,.12);
+    cursor:pointer;
+    box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    transition:.2s ease;
+    user-select:none;
+  }
+  .choiceBtn:hover{ transform: translateY(-2px); }
+  .choiceBtn.continue{ background: linear-gradient(135deg, #ff6fa0, #e94b7a); color:#fff; border-color: rgba(255,255,255,.35); }
+  .choiceBtn.mystery{ background: linear-gradient(135deg, #2a2a2a, #0e0e0e); color:#fff; border-color: rgba(255,255,255,.12); }
+
+  /* stage2 hidden by default */
+  #envStage2{ display:none; }
 </style>
 </head>
 <body>
@@ -367,6 +451,10 @@
     <div class="gameArea" id="gameArea">
 
       <div class="boxWrap" id="boxWrap" aria-label="Gift box draggable">
+        <!-- NEW: treasure flash + sparkles -->
+        <div class="treasureFlash"></div>
+        <div class="sparkles" id="sparkles"></div>
+
         <div class="boxGlow"></div>
         <div class="box">
           <div class="lid"></div>
@@ -397,6 +485,7 @@
     </div>
   </div>
 
+  <!-- ======= Envelope Stage 1 ======= -->
   <div class="stage envelopeStage" id="envStage">
     <div class="title" style="margin-bottom:10px;">
       <h1>💌 Secret Envelope — ظرف أسرار</h1>
@@ -419,15 +508,22 @@
             وصدقيني… هذا بس أول سر 😌
           </div>
 
+          <!-- NEW: choice row -->
+          <div class="choiceRow">
+            <button class="choiceBtn continue" id="chooseContinue">Continue 💖</button>
+            <button class="choiceBtn mystery" id="chooseMystery">Mystery 🕯️</button>
+          </div>
+
           <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
             <button class="ghost" id="openInside">افتح اللي جواها — Open Inside</button>
-            <button class="primary" onclick="alert('إذا بدك أكملها لمسارات (Continue/Mystery) جوّا الظرف… احكيلي وبكمّلها بنفس الستايل 👌')">التالي — Next ✨</button>
+            <button class="primary" id="nextHint">التالي — Next ✨</button>
           </div>
 
           <div class="inner" id="inner">
             <div class="innerPad">
               <div style="font-weight:900; margin-bottom:6px;">📄 رسالة داخل رسالة — Nested</div>
               <div>If you reached here… you’re officially my favorite person 😭❤️</div>
+              <div style="margin-top:8px; opacity:.85;">(اختاري مسار فوق 👆 عشان يطلع الظرف الثاني)</div>
             </div>
           </div>
         </div>
@@ -442,6 +538,36 @@
       </div>
     </div>
   </div>
+
+  <!-- ======= Envelope Stage 2 (NEW) ======= -->
+  <div class="stage envelopeStage" id="envStage2">
+    <div class="title" style="margin-bottom:10px;">
+      <h1>💌 Secret Envelope — الرسالة الثانية</h1>
+      <p id="stage2Sub">حسب اختيارك… اكبس القلب ✨</p>
+    </div>
+
+    <div class="scene" id="envScene2">
+      <div class="letter" id="letter2">
+        <div class="header">
+          <div class="pill" id="pathTitle">✨ رسالة خاصة</div>
+          <div class="small">جديدة ✅</div>
+        </div>
+
+        <div class="content" id="pathContent">
+          <!-- بيتعبّى من الجافاسكربت -->
+        </div>
+      </div>
+
+      <div class="envelope" id="envelope2">
+        <div class="triangle-left"></div>
+        <div class="triangle-right"></div>
+        <div class="triangle-bottom"></div>
+        <div class="flap" id="flap2"></div>
+        <div class="seal" id="seal2" title="اضغط القلب"><div class="h"></div></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -468,6 +594,7 @@
   const stageBox = document.getElementById("stageBox");
   const envStage = document.getElementById("envStage");
   const secretBtn = document.getElementById("secretBtn");
+  const sparkles = document.getElementById("sparkles");
 
   let isDrag = false, startX=0, startY=0, boxX=0, boxY=0;
   let keyRevealed = false, keyPicked = false, boxOpened = false;
@@ -544,23 +671,55 @@
     setTimeout(openBox, 450);
   });
 
+  function spawnSparkles(){
+    // create burst around the box center
+    const rect = boxWrap.getBoundingClientRect();
+    const parent = gameArea.getBoundingClientRect();
+    const centerX = (rect.left - parent.left) + rect.width/2;
+    const centerY = (rect.top - parent.top) + rect.height/2;
+
+    for(let i=0;i<18;i++){
+      const s = document.createElement("div");
+      s.className = "spark";
+      const x = centerX + (Math.random()*140 - 70);
+      const y = centerY + (Math.random()*90  - 45);
+      s.style.left = x + "px";
+      s.style.top  = y + "px";
+      const dx = (Math.random()*240 - 120) + "px";
+      const dy = (-40 - Math.random()*180) + "px";
+      s.style.setProperty("--dx", dx);
+      s.style.setProperty("--dy", dy);
+      sparkles.appendChild(s);
+      s.addEventListener("animationend", ()=> s.remove());
+    }
+  }
+
   function openBox(){
     if(boxOpened) return;
     boxOpened = true;
     stageBox.classList.add("opened");
-    status.textContent = "✨ الصندوق انفتح!";
+
+    // NEW: treasure flash
+    boxWrap.classList.add("treasureBurst");
+    spawnSparkles();
+
+    status.textContent = "✨ كنز! الصندوق انفتح!";
 
     setTimeout(() => {
       document.body.classList.add("showEnvelope");
       envStage.style.display = "block";
       envStage.scrollIntoView({behavior:"smooth", block:"start"});
     }, 900);
+
+    // fade flash after a bit
+    setTimeout(()=> boxWrap.classList.remove("treasureBurst"), 1200);
   }
 
-  // envelope interactions
+  // envelope interactions (stage 1)
   const envScene = document.getElementById("envScene");
   const seal = document.getElementById("seal");
   const openInside = document.getElementById("openInside");
+  const nextHint = document.getElementById("nextHint");
 
   seal.addEventListener("click", () => {
     seal.classList.remove("wiggle");
@@ -573,7 +732,73 @@
     envScene.classList.toggle("innerOpen");
   });
 
+  nextHint.addEventListener("click", () => {
+    alert("اختاري Continue أو Mystery فوق 👆 عشان يطلع الظرف الثاني 😉");
+  });
+
   envStage.style.display = "none";
+
+  // ======= NEW: Envelope Stage 2 logic =======
+  const envStage2 = document.getElementById("envStage2");
+  const envScene2 = document.getElementById("envScene2");
+  const seal2 = document.getElementById("seal2");
+  const pathTitle = document.getElementById("pathTitle");
+  const pathContent = document.getElementById("pathContent");
+  const stage2Sub = document.getElementById("stage2Sub");
+
+  const chooseContinue = document.getElementById("chooseContinue");
+  const chooseMystery  = document.getElementById("chooseMystery");
+
+  let stage2Ready = false;
+
+  function showSecondEnvelope(){
+    if(stage2Ready) return;
+    stage2Ready = true;
+    envStage2.style.display = "block";
+    envStage2.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  chooseContinue.addEventListener("click", () => {
+    pathTitle.textContent = "💖 Continue Path — تكملة";
+    stage2Sub.textContent = "اخترت Continue… اكبس القلب ✨";
+    pathContent.innerHTML = `
+      <div style="font-weight:900; font-size:16px; margin-bottom:8px;">“I’m glad you stayed.” 💗</div>
+      <div>
+        اختيارك يعني إنك شخص ما بهرب من الشعور…
+        <br><br>
+        <b>وأنا؟</b> وجودك معي بيعمل فرق كبير.
+        <br>
+        خليها بداية… مش مجرد رسالة 😌✨
+      </div>
+    `;
+    showSecondEnvelope();
+  });
+
+  chooseMystery.addEventListener("click", () => {
+    pathTitle.textContent = "🕯️ Mystery Path — غموض";
+    stage2Sub.textContent = "اخترت Mystery… اكبس القلب ✨";
+    pathContent.innerHTML = `
+      <div style="font-weight:900; font-size:16px; margin-bottom:8px;">“Not all secrets want daylight…” 🕯️</div>
+      <div>
+        في سرّ صغير… ما بنقال بسرعة.
+        <br><br>
+        بس تذكّر:
+        <br>
+        <b>أنت أقرب مما تتخيّل</b> 👀✨
+        <br><br>
+        وإذا وصلت له… رح تعرف إنك كنت “المقصود” من البداية.
+      </div>
+    `;
+    showSecondEnvelope();
+  });
+
+  // stage 2 seal opens stage 2 envelope
+  seal2.addEventListener("click", () => {
+    seal2.classList.remove("wiggle");
+    void seal2.offsetWidth;
+    seal2.classList.add("wiggle");
+    envScene2.classList.add("openedEnv");
+  });
 </script>
 
 </body>
