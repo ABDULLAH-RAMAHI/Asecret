@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Secret Box 💌</title>
+  <style>
+    :root{
+      --bg1:#ffd6e7;
+      --bg2:#fff1f7;
+      --ink:#2b1b2a;
+      --pink:#e94b7a;
+      --pink2:#ff6fa0;
+      --card:#ffffffcc;
+      --glass:#ffffff30;
+      --shadow: 0 20px 60px rgba(0,0,0,.12);
+    }
+    *{box-sizing:border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(1200px 800px at 20% 10%, #ffe2f0 0%, transparent 60%),
+        radial-gradient(1000px 700px at 80% 30%, #ffd0e3 0%, transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      color:var(--ink);
+      overflow:hidden;
+    }
+
+    /* soft floating hearts */
+    .floaters{
+      position:fixed; inset:0; pointer-events:none; overflow:hidden;
+      opacity:.85;
+    }
+    .heart{
+      position:absolute;
+      width:14px; height:14px;
+      background:var(--pink2);
+      transform: rotate(45deg);
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.12));
+      animation: rise linear infinite;
+      border-radius:3px;
+    }
+    .heart:before, .heart:after{
+      content:"";
+      position:absolute;
+      width:14px; height:14px;
+      background:inherit;
+      border-radius:50%;
+    }
+    .heart:before{ left:-7px; top:0; }
+    .heart:after{ left:0; top:-7px; }
+
+    @keyframes rise{
+      from{ transform:translateY(110vh) rotate(45deg) scale(.9); opacity:0; }
+      10%{ opacity:.95; }
+      to{ transform:translateY(-20vh) rotate(45deg) scale(1.2); opacity:0; }
+    }
+
+    /* twinkling stars */
+    .stars{
+      position:fixed; inset:0; pointer-events:none; opacity:.45;
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, #fff 50%, transparent 51%),
+        radial-gradient(1.5px 1.5px at 30% 80%, #fff 50%, transparent 51%),
+        radial-gradient(1.8px 1.8px at 60% 40%, #fff 50%, transparent 51%),
+        radial-gradient(1.2px 1.2px at 80% 70%, #fff 50%, transparent 51%),
+        radial-gradient(1.6px 1.6px at 90% 25%, #fff 50%, transparent 51%);
+      animation: twinkle 3.5s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle{ from{opacity:.25} to{opacity:.6} }
+
+    .wrap{
+      width:min(920px, 92vw);
+      padding:22px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      box-shadow: var(--shadow);
+      border-radius:22px;
+      padding:24px;
+      backdrop-filter: blur(10px);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .top{
+      display:flex;
+      gap:18px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .badge{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      padding:10px 14px;
+      background:rgba(233,75,122,.12);
+      border:1px solid rgba(233,75,122,.25);
+      border-radius:999px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .badge b{ color:var(--pink) }
+
+    h1{
+      margin:8px 0 4px;
+      font-size: clamp(22px, 3.6vw, 34px);
+      line-height:1.2;
+    }
+    p{
+      margin:8px 0;
+      font-size: clamp(14px, 2.2vw, 16px);
+      line-height:1.8;
+      opacity:.95;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:16px;
+      margin-top:14px;
+    }
+    @media (max-width: 820px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      background:rgba(255,255,255,.55);
+      border:1px solid rgba(255,255,255,.75);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .btns{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+    button{
+      border:none;
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:800;
+      cursor:pointer;
+      transition:.18s transform, .18s filter, .18s opacity;
+      box-shadow: 0 10px 24px rgba(0,0,0,.10);
+    }
+    button:hover{ transform: translateY(-2px); filter:saturate(1.1); }
+    button:active{ transform: translateY(0px) scale(.98); }
+
+    .primary{ background:linear-gradient(135deg, var(--pink), var(--pink2)); color:#fff; }
+    .ghost{ background:rgba(255,255,255,.75); color:var(--ink); border:1px solid rgba(0,0,0,.06); }
+    .danger{ background:rgba(220,53,69,.92); color:#fff; }
+
+    .level{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:14px;
+    }
+    .bar{
+      flex:1;
+      height:10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.08);
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--pink), var(--pink2));
+      transition: width .45s ease;
+    }
+    .small{ font-size:13px; opacity:.8; }
+
+    .stage{
+      display:none;
+      animation: pop .42s ease;
+    }
+    .stage.active{ display:block; }
+    @keyframes pop{
+      from{ opacity:0; transform: translateY(10px) scale(.98); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    .secretBox{
+      margin-top:10px;
+      padding:16px;
+      border-radius:18px;
+      border:1px dashed rgba(233,75,122,.45);
+      background:rgba(233,75,122,.06);
+      position:relative;
+      overflow:hidden;
+    }
+    .secretBox .lid{
+      height:16px;
+      background:rgba(233,75,122,.20);
+      border-radius:12px;
+      margin-bottom:10px;
+      transform-origin: left center;
+      transition: .45s transform;
+    }
+    .secretBox.open .lid{
+      transform: rotate(-8deg) translateY(-2px);
+    }
+
+    .pulse{
+      display:inline-block;
+      animation: beat 1.15s ease-in-out infinite;
+    }
+    @keyframes beat{
+      0%,100%{ transform: scale(1); }
+      50%{ transform: scale(1.07); }
+    }
+
+    .choiceRow{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .inputRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+      align-items:center;
+    }
+    input{
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid rgba(0,0,0,.12);
+      outline:none;
+      min-width:min(320px, 84vw);
+      background:rgba(255,255,255,.8);
+    }
+
+    .finalBox{
+      margin-top:12px;
+      padding:18px;
+      border-radius:18px;
+      background: linear-gradient(135deg, rgba(233,75,122,.16), rgba(255,111,160,.10));
+      border:1px solid rgba(233,75,122,.25);
+    }
+
+    /* confetti */
+    .confetti{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      display:none;
+    }
+    .confetti.show{ display:block; }
+    .confetti span{
+      position:absolute;
+      width:10px; height:16px;
+      background:rgba(233,75,122,.9);
+      top:-20px;
+      animation: fall 1.6s ease-in-out forwards;
+      border-radius:3px;
+      opacity:.9;
+    }
+    @keyframes fall{
+      to{ transform: translateY(110vh) rotate(360deg); opacity:0; }
+    }
+
+    /* "No" button dodge */
+    .dodgeWrap{
+      position:relative;
+      display:inline-block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars"></div>
+  <div class="floaters" id="floaters"></div>
+  <div class="confetti" id="confetti"></div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div class="badge">🎁 <b>Secret Box</b> — Romantic Puzzle</div>
+        <div class="small">مستوى الحب: <span class="pulse">❤️</span></div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="level">
+        <div class="bar"><div class="fill" id="fill"></div></div>
+        <div class="small" id="levelTxt">0%</div>
+      </div>
+
+      <!-- STAGE 1 -->
+      <div class="stage active" id="s1">
+        <h1>عندي سر… I have a secret 😌</h1>
+        <p>
+          بس ما بينفتح إلا إذا كبستِ الزر…  
+          <b>Click it</b> وخلّي الفضول يشتغل شوي ✨
+        </p>
+
+        <div class="btns">
+          <button class="primary" onclick="go(2)">افتح السر الأول — Open 1</button>
+          <button class="ghost" onclick="hint()">تلميح صغير — Hint</button>
+        </div>
+
+        <div class="panel" id="hintBox" style="display:none; margin-top:12px;">
+          <p>التلميح: كل مرحلة جواها “شيء”… وورا الشيء “شيء أجمل” 😉</p>
+        </div>
+      </div>
+
+      <!-- STAGE 2 -->
+      <div class="stage" id="s2">
+        <h1>السر الأول: صندوق صغير 🎀</h1>
+        <p>إمسكي… هذا أول صندوق. افتحيه عشان يطلع اللي جواه.</p>
+
+        <div class="secretBox" id="box1">
+          <div class="lid"></div>
+          <p>
+            داخل الصندوق مكتوب:  
+            <b>“You make my day softer… and my heart louder.”</b> 💗
+          </p>
+          <p class="small">بس لسه… في صندوق ثاني جوّاه.</p>
+        </div>
+
+        <div class="btns">
+          <button class="primary" onclick="openBox('box1'); go(3)">افتح الصندوق — Open</button>
+          <button class="ghost" onclick="back(1)">رجوع — Back</button>
+        </div>
+      </div>
+
+      <!-- STAGE 3 -->
+      <div class="stage" id="s3">
+        <h1>السر الثاني: مغلف + قفل ✉️🔒</h1>
+        <p>
+          المغلف فيه طريقين…  
+          اختاري: <b>نكمل؟</b> أو <b>نخبي السر؟</b>
+        </p>
+
+        <div class="choiceRow">
+          <button class="primary" onclick="goPath('A')">أكمّل — Continue ❤️</button>
+          <button class="ghost" onclick="goPath('B')">أخبي السر — Hide 🙈</button>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <p class="small">
+            (اختيارك رح يفتح مسار مختلف تمامًا)
+          </p>
+        </div>
+      </div>
+
+      <!-- PATH A -->
+      <div class="stage" id="sA">
+        <h1>مسار القلب — Heart Path 💘</h1>
+        <p>
+          ممتاز… هسا رح تلاقي 3 أبواب:  
+          <b>ذكرى</b> — <b>وعد</b> — <b>مفاجأة</b>
+        </p>
+
+        <div class="grid">
+          <div class="panel">
+            <h3 style="margin:0 0 8px;">1) ذكرى — Memory</h3>
+            <p>
+              “في ناس وجودها بعمل راحة…  
+              You’re that kind of peace.” 🌙
+            </p>
+            <button class="ghost" onclick="reveal('mem')">افتح — Open</button>
+            <div id="mem" style="display:none; margin-top:10px;">
+              <p class="small">💌 تلميح: اكتبي هون ذكرى حلوة بينكم (أو اتركيها غامضة 😉)</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3 style="margin:0 0 8px;">2) وعد — Promise</h3>
+            <p>Promise: I’ll be the “safe place” in your busy days.</p>
+            <button class="ghost" onclick="reveal('pr')">افتح — Open</button>
+            <div id="pr" style="display:none; margin-top:10px;">
+              <ul style="margin:0; padding:0 18px; line-height:1.9;">
+                <li>أسمع قبل ما أحكي.</li>
+                <li>أكون سند… مش ضغط.</li>
+                <li>وأخلي الضحكة عادة 💞</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:14px;">
+          <h3 style="margin:0 0 8px;">3) مفاجأة — Surprise 🎁</h3>
+          <p>في زر إذا كبستيه… بتفتحي “السر الأعمق”.</p>
+          <div class="btns">
+            <button class="primary" onclick="go(4)">افتح السر الأعمق — Deep Secret</button>
+            <button class="ghost" onclick="back(3)">رجوع — Back</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PATH B -->
+      <div class="stage" id="sB">
+        <h1>مسار الغموض — Mystery Path 🕯️</h1>
+        <p>
+          أوكي… بس ما بنخبي السر ببلاش 😌  
+          لازم تحلي لغز بسيط:
+        </p>
+
+        <div class="panel">
+          <p><b>أكملي الجملة:</b> أنتِ ____ حياتي</p>
+          <p class="small">Hint: كلمة كثير ناس بحبوها… (نور / أمان / حلوة / ...)</p>
+
+          <div class="inputRow">
+            <input id="ans" placeholder="اكتبي الإجابة هنا… / Type here…" />
+            <button class="primary" onclick="checkAns()">افتح القفل — Unlock</button>
+          </div>
+
+          <p class="small" id="msg" style="margin-top:8px;"></p>
+        </div>
+
+        <div class="btns">
+          <button class="ghost" onclick="back(3)">رجوع — Back</button>
+        </div>
+      </div>
+
+      <!-- STAGE 4 -->
+      <div class="stage" id="s4">
+        <h1>آخر سر… Last Secret 🫶</h1>
+        <p>
+          وصلتي للنهاية… بس بصراحة؟  
+          This is where the real question starts…
+        </p>
+
+        <div class="finalBox">
+          <h2 style="margin:0 0 8px;">
+            Will you be my Valentine? 💌  
+            <span class="small">(هل بتوافقي تكوني Valentine تبعي؟)</span>
+          </h2>
+          <p class="small">اختاري… بس انتبهي: “لا” بتحب تمزح شوي 😂</p>
+
+          <div class="btns" style="margin-top:12px;">
+            <button class="primary" onclick="yes()">Yes 😍</button>
+
+            <span class="dodgeWrap" id="dodgeWrap">
+              <button class="danger" id="noBtn">No 🙄</button>
+            </span>
+          </div>
+
+          <div id="finalMsg" style="display:none; margin-top:14px;">
+            <p class="pulse" style="font-weight:900; font-size:18px;">
+              😭❤️ YAAAY!  
+              <span class="small">خلص… هذا أحلى “Yes” بالدنيا.</span>
+            </p>
+            <p class="small">
+              (هون اكتب موعد/مكان/رسالة أخيرة… Example: “Tomorrow 7 PM? 🌹”)
+            </p>
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="ghost" onclick="back(3)">رجوع — Back</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Progress handling
+    const fill = document.getElementById("fill");
+    const levelTxt = document.getElementById("levelTxt");
+    function setProgress(p){
+      fill.style.width = p + "%";
+      levelTxt.textContent = p + "%";
+    }
+
+    // Stage navigation
+    const stages = ["s1","s2","s3","sA","sB","s4"];
+    function show(id){
+      stages.forEach(s => document.getElementById(s).classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    function go(n){
+      // n: 2 -> s2, 3 -> s3, 4 -> s4
+      if(n===2){ show("s2"); setProgress(22); }
+      if(n===3){ show("s3"); setProgress(44); }
+      if(n===4){ show("s4"); setProgress(88); }
+    }
+    function back(n){
+      if(n===1){ show("s1"); setProgress(0); }
+      if(n===3){ show("s3"); setProgress(44); }
+    }
+
+    function hint(){
+      const box = document.getElementById("hintBox");
+      box.style.display = box.style.display === "none" ? "block" : "none";
+    }
+
+    function openBox(id){
+      document.getElementById(id).classList.add("open");
+    }
+
+    function reveal(id){
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === "none" ? "block" : "none";
+    }
+
+    function goPath(path){
+      if(path==="A"){ show("sA"); setProgress(66); }
+      if(path==="B"){ show("sB"); setProgress(66); }
+    }
+
+    // Simple answer check for path B
+    function checkAns(){
+      const v = (document.getElementById("ans").value || "").trim().toLowerCase();
+      const msg = document.getElementById("msg");
+
+      // Accept a few romantic answers
+      const ok = ["نور","امان","أمان","حلوة","حلوه","دنيا","روحي","قلبي","my","life","everything"];
+      const pass = ok.some(k => v.includes(k.toLowerCase()));
+
+      if(pass){
+        msg.textContent = "صح 😌✨ القفل انفتح… يلا على السر الأعمق!";
+        msg.style.opacity = 1;
+        setTimeout(()=> go(4), 700);
+      } else {
+        msg.textContent = "قريبة… جرّبي كلمة رومانسية أكثر 💗 (نور/أمان/قلبي...)";
+        msg.style.opacity = 1;
+      }
+    }
+
+    // confetti
+    const confetti = document.getElementById("confetti");
+    function burst(){
+      confetti.innerHTML = "";
+      confetti.classList.add("show");
+      const count = 70;
+      for(let i=0;i<count;i++){
+        const s = document.createElement("span");
+        s.style.left = Math.random()*100 + "vw";
+        s.style.transform = `rotate(${Math.random()*360}deg)`;
+        s.style.animationDelay = (Math.random()*0.25) + "s";
+        s.style.opacity = (0.6 + Math.random()*0.4).toFixed(2);
+        s.style.width = (8 + Math.random()*10) + "px";
+        s.style.height = (10 + Math.random()*16) + "px";
+        confetti.appendChild(s);
+      }
+      setTimeout(()=> confetti.classList.remove("show"), 1700);
+    }
+
+    function yes(){
+      setProgress(100);
+      burst();
+      document.getElementById("finalMsg").style.display = "block";
+    }
+
+    // "No" button dodge (cute)
+    const noBtn = document.getElementById("noBtn");
+    const dodgeWrap = document.getElementById("dodgeWrap");
+
+    let dodges = 0;
+    noBtn.addEventListener("mouseenter", () => {
+      dodges++;
+      const dx = (Math.random()*160 - 80);
+      const dy = (Math.random()*80 - 40);
+      dodgeWrap.style.transform = `translate(${dx}px, ${dy}px)`;
+      dodgeWrap.style.transition = "transform .12s ease";
+      if(dodges >= 6){
+        noBtn.textContent = "Ok ok 😭";
+        noBtn.classList.remove("danger");
+        noBtn.classList.add("ghost");
+      }
+    });
+
+    noBtn.addEventListener("click", () => {
+      // gently redirect
+      go(3);
+    });
+
+    // Floating hearts generator
+    const floaters = document.getElementById("floaters");
+    function spawnHeart(){
+      const h = document.createElement("div");
+      h.className = "heart";
+      h.style.left = Math.random()*100 + "vw";
+      h.style.animationDuration = (5 + Math.random()*5) + "s";
+      h.style.opacity = (0.35 + Math.random()*0.6).toFixed(2);
+      h.style.transform = `rotate(45deg) scale(${0.75 + Math.random()*0.9})`;
+      floaters.appendChild(h);
+      setTimeout(()=> h.remove(), 11000);
+    }
+    setInterval(spawnHeart, 380);
+    for(let i=0;i<10;i++) setTimeout(spawnHeart, i*120);
+
+    // init
+    setProgress(0);
+  </script>
+</body>
+</html>
