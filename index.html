@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gift Box Puzzle 💝</title>
+<title>Secret Gift 🎁</title>
 <style>
   :root{
     --bg1:#ffd6e7;
@@ -231,6 +231,37 @@
     width:8px; height:16px;
     background: rgba(60,30,10,.65);
     border-radius: 0 0 6px 6px;
+  }
+
+  /* ======= SECRET BUTTON INSIDE BOX ======= */
+  .secretBtn{
+    position:absolute;
+    right:16px;
+    bottom:16px;
+    padding:10px 12px;
+    border-radius:14px;
+    font-weight:900;
+    font-size:13px;
+    background: rgba(255,255,255,.9);
+    border:1px solid rgba(0,0,0,.10);
+    box-shadow: 0 12px 28px rgba(0,0,0,.14);
+    cursor:pointer;
+    opacity:0;
+    transform: translateY(10px) scale(.98);
+    transition: .35s ease;
+    pointer-events:none;
+    z-index:30;
+    user-select:none;
+  }
+  .secretBtn::before{
+    content:"✨";
+    margin-left:8px;
+  }
+  /* يظهر فقط بعد أول حركة للصندوق */
+  .boxMoved .secretBtn{
+    opacity:1;
+    transform: translateY(0) scale(1);
+    pointer-events:auto;
   }
 
   /* ======= KEY (APPEARS + PICK UP) ======= */
@@ -491,7 +522,7 @@
   .openedEnv .letter{
     transform: translateY(-10px);
     opacity:1;
-    z-index:50; /* مهم عشان ما تصير ورا الظرف */
+    z-index:50;
   }
   .innerOpen .inner{ height: 150px; }
 
@@ -503,8 +534,8 @@
 
 <div class="wrap">
   <div class="title">
-    <h1>🎁 Gift Box Puzzle — لغز صندوق الهدايا</h1>
-    <p>حرّك الصندوق… اكبس الزر… خذ المفتاح… وافتح السر 💛 / Drag, press, take the key.</p>
+    <h1>🎁 Secret Gift — هدية سرية</h1>
+    <p>حرّك الصندوق… راح يبين زر مخفي… اكبس عليه… خذ المفتاح… وافتح السر 💛 / Drag, find the secret, take the key.</p>
   </div>
 
   <div class="stage" id="stageBox">
@@ -513,10 +544,14 @@
       <!-- Draggable Box -->
       <div class="boxWrap" id="boxWrap" aria-label="Gift box draggable">
         <div class="boxGlow"></div>
+
         <div class="box">
           <div class="lid"></div>
           <div class="lockPlate"><div class="keyhole"></div></div>
         </div>
+
+        <!-- Secret button appears after moving -->
+        <div class="secretBtn" id="secretBtn" title="Secret Button">زر مخفي</div>
       </div>
 
       <!-- Key -->
@@ -531,15 +566,14 @@
         </div>
       </div>
 
-      <!-- Button below -->
+      <!-- Status only (no reveal key button) -->
       <div class="floorBtn">
-        <button class="primary" id="btnKey">طلّع المفتاح — Reveal Key</button>
-        <div class="status" id="status">🔒 الصندوق مقفل</div>
+        <div class="status" id="status">حرّك الصندوق… راح يبين زر مخفي 👀</div>
       </div>
     </div>
 
     <div class="hint" id="hint">
-      1) حرّك الصندوق بالماوس 🖱️ &nbsp; 2) كبس الزر &nbsp; 3) اضغط على المفتاح عشان “تأخذه”
+      1) حرّك الصندوق بالماوس 🖱️ &nbsp; 2) رح يبين زر داخل الصندوق &nbsp; 3) اكبس الزر → يطلع المفتاح &nbsp; 4) اكبس المفتاح عشان “تأخذه”
     </div>
   </div>
 
@@ -562,7 +596,7 @@
             “You make my day softer… and my heart louder.” 💗
           </div>
           <div>
-            بالعربي: <b>وجودك بيخلّي كل شي ألطف.</b>  
+            بالعربي: <b>وجودك بيخلّي كل شي ألطف.</b>
             وصدقيني… هذا بس أول سر 😌
           </div>
 
@@ -631,39 +665,57 @@
     boxY = rect.top - parent.top;
   });
 
+  // ===== key logic =====
+  const key = document.getElementById("key");
+  const status = document.getElementById("status");
+  const stageBox = document.getElementById("stageBox");
+  const envStage = document.getElementById("envStage");
+  const secretBtn = document.getElementById("secretBtn");
+
+  let keyRevealed = false;
+  let keyPicked = false;
+  let boxOpened = false;
+  let movedOnce = false;
+
+  function markMoved(){
+    if(movedOnce) return;
+    movedOnce = true;
+    stageBox.classList.add("boxMoved");
+    status.textContent = "👀 ظهر زر مخفي داخل الصندوق… اكبس عليه!";
+  }
+
   boxWrap.addEventListener("pointermove", (e) => {
     if(!isDrag) return;
+
+    markMoved();
+
     const parent = gameArea.getBoundingClientRect();
     const newX = boxX + (e.clientX - startX);
     const newY = boxY + (e.clientY - startY);
 
     // bounds inside gameArea
     const maxX = parent.width - boxWrap.offsetWidth;
-    const maxY = parent.height - boxWrap.offsetHeight - 70; // keep above bottom button area
+    const maxY = parent.height - boxWrap.offsetHeight - 70; // keep above bottom bar
 
     const cx = clamp(newX, 10, maxX-10);
     const cy = clamp(newY, 10, maxY);
 
     boxWrap.style.left = cx + "px";
     boxWrap.style.top  = cy + "px";
-    boxWrap.style.transform = "translate(0,0)"; // override center transform after first move
+    boxWrap.style.transform = "translate(0,0)";
   });
 
   boxWrap.addEventListener("pointerup", () => { isDrag = false; });
 
-  // ===== key logic =====
-  const btnKey = document.getElementById("btnKey");
-  const key = document.getElementById("key");
-  const status = document.getElementById("status");
-  const stageBox = document.getElementById("stageBox");
-  const envStage = document.getElementById("envStage");
-
-  let keyRevealed = false;
-  let keyPicked = false;
-  let boxOpened = false;
-
-  btnKey.addEventListener("click", () => {
+  // secret button reveals key
+  secretBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
     if(boxOpened) return;
+    if(!movedOnce){
+      markMoved();
+    }
+    if(keyRevealed) return;
+
     keyRevealed = true;
     key.classList.add("show");
     status.textContent = "🔑 المفتاح طلع… اضغطه وخذه";
@@ -674,7 +726,6 @@
     keyPicked = true;
     key.classList.add("picked");
     status.textContent = "✅ أخذت المفتاح… افتح الصندوق!";
-    // open box after short beat
     setTimeout(openBox, 450);
   });
 
@@ -684,10 +735,8 @@
     stageBox.classList.add("opened");
     status.textContent = "✨ الصندوق انفتح!";
 
-    // after glow, reveal envelope stage
     setTimeout(() => {
       document.body.classList.add("showEnvelope");
-      envStage.classList.add("envelopeStage"); // just in case
       envStage.style.display = "block";
       envStage.scrollIntoView({behavior:"smooth", block:"start"});
     }, 900);
@@ -697,7 +746,6 @@
   const envScene = document.getElementById("envScene");
   const seal = document.getElementById("seal");
   const openInside = document.getElementById("openInside");
-  const inner = document.getElementById("inner");
 
   seal.addEventListener("click", () => {
     seal.classList.remove("wiggle");
