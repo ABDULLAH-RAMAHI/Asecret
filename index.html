@@ -1,512 +1,231 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Love Envelope 💌</title>
-  <style>
-    :root{
-      --bg1:#ffd6e7;
-      --bg2:#fff1f7;
-      --ink:#2b1b2a;
-      --pink:#e94b7a;
-      --pink2:#ff6fa0;
-      --shadow: 0 24px 80px rgba(0,0,0,.12);
-      --paper:#fffdfb;
-      --envelope:#ffffff;
-      --envelopeEdge:#f2f2f6;
-      --stroke: rgba(0,0,0,.08);
-    }
-    *{ box-sizing:border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body{
-      margin:0;
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      background:
-        radial-gradient(1200px 800px at 20% 10%, #ffe2f0 0%, transparent 60%),
-        radial-gradient(1000px 700px at 80% 30%, #ffd0e3 0%, transparent 55%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      color:var(--ink);
-      overflow:hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret Envelope 💌</title>
 
-    /* subtle stars */
-    .stars{
-      position:fixed; inset:0; pointer-events:none; opacity:.42;
-      background-image:
-        radial-gradient(2px 2px at 10% 20%, #fff 50%, transparent 51%),
-        radial-gradient(1.5px 1.5px at 30% 80%, #fff 50%, transparent 51%),
-        radial-gradient(1.8px 1.8px at 60% 40%, #fff 50%, transparent 51%),
-        radial-gradient(1.2px 1.2px at 80% 70%, #fff 50%, transparent 51%),
-        radial-gradient(1.6px 1.6px at 90% 25%, #fff 50%, transparent 51%);
-      animation: twinkle 3.5s ease-in-out infinite alternate;
-    }
-    @keyframes twinkle{ from{opacity:.22} to{opacity:.55} }
+<style>
+*{
+  box-sizing:border-box;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
 
-    /* floating hearts */
-    .floaters{ position:fixed; inset:0; pointer-events:none; overflow:hidden; opacity:.85; }
-    .heart-f{
-      position:absolute;
-      width:14px; height:14px;
-      background:var(--pink2);
-      transform: rotate(45deg);
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,.12));
-      animation: rise linear infinite;
-      border-radius:3px;
-    }
-    .heart-f:before, .heart-f:after{
-      content:"";
-      position:absolute;
-      width:14px; height:14px;
-      background:inherit;
-      border-radius:50%;
-    }
-    .heart-f:before{ left:-7px; top:0; }
-    .heart-f:after{ left:0; top:-7px; }
-    @keyframes rise{
-      from{ transform:translateY(110vh) rotate(45deg) scale(.9); opacity:0; }
-      10%{ opacity:.95; }
-      to{ transform:translateY(-20vh) rotate(45deg) scale(1.2); opacity:0; }
-    }
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background: linear-gradient(135deg,#ffd6e7,#fff1f7);
+  overflow:hidden;
+}
 
-    .wrap{
-      width:min(980px, 92vw);
-      padding:24px;
-      display:grid;
-      place-items:center;
-    }
+/* ===== SCENE ===== */
+.scene{
+  position:relative;
+  width:520px;
+  height:420px;
+}
 
-    .title{
-      text-align:center;
-      margin-bottom:14px;
-      opacity:.95;
-    }
-    .title h1{
-      margin:0;
-      font-size: clamp(20px, 3.4vw, 34px);
-      line-height:1.2;
-    }
-    .title p{
-      margin:8px 0 0;
-      line-height:1.8;
-      font-size: clamp(13px, 2.2vw, 16px);
-    }
+/* ===== ENVELOPE ===== */
+.envelope{
+  position:absolute;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  width:520px;
+  height:300px;
+  background:white;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
+  z-index:10;
+  transition:transform .6s ease;
+  overflow:hidden;
+}
 
-    /* === Envelope Scene === */
-    .scene{
-      position:relative;
-      width:min(560px, 92vw);
-      height: 420px;
-      display:grid;
-      place-items:center;
-    }
+/* flap */
+.flap{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:150px;
+  background:#fff;
+  clip-path: polygon(0 0,100% 0,50% 100%);
+  transform-origin:top;
+  transition:transform .6s ease;
+}
 
-    .envelope{
-      position:absolute;
-      width:min(520px, 92vw);
-      height: 300px;
-      bottom:30px;
-      border-radius:22px;
-      background: var(--envelope);
-      box-shadow: var(--shadow);
-      border:1px solid rgba(0,0,0,.06);
-      overflow:visible;
-      transform: translateY(0);
-      transition: transform .5s ease;
-    }
+/* bottom */
+.bottom{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  height:160px;
+  background:#f7c1d7;
+  clip-path: polygon(0 100%,100% 100%,50% 0);
+}
 
-    /* envelope front geometry */
-    .env-front{
-      position:absolute;
-      inset:0;
-      border-radius:22px;
-      overflow:hidden;
-    }
-    .env-front:before{
-      /* top flap shadow edge */
-      content:"";
-      position:absolute;
-      left:0; right:0;
-      top:0;
-      height:60%;
-      background: linear-gradient(180deg, rgba(0,0,0,.03), transparent 60%);
-      pointer-events:none;
-      opacity:.5;
-    }
+/* ===== HEART BUTTON ===== */
+.heart-btn{
+  position:absolute;
+  top:130px;
+  left:50%;
+  transform:translateX(-50%);
+  width:60px;
+  height:60px;
+  background:#ff5c8a;
+  border-radius:16px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  box-shadow:0 12px 30px rgba(255,92,138,.4);
+  z-index:20;
+}
 
-    .triangle-left{
-      position:absolute;
-      left:-2px; top:0;
-      width:0; height:0;
-      border-top:150px solid transparent;
-      border-bottom:150px solid transparent;
-      border-right:260px solid var(--envelopeEdge);
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.02));
-    }
-    .triangle-right{
-      position:absolute;
-      right:-2px; top:0;
-      width:0; height:0;
-      border-top:150px solid transparent;
-      border-bottom:150px solid transparent;
-      border-left:260px solid var(--envelopeEdge);
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.02));
-    }
-    .triangle-bottom{
-      position:absolute;
-      left:0; right:0; bottom:-2px;
-      margin:auto;
-      width:0; height:0;
-      border-left:260px solid transparent;
-      border-right:260px solid transparent;
-      border-top:170px solid rgba(233,75,122,.10);
-      opacity:.85;
-    }
+.heart{
+  width:22px;
+  height:22px;
+  background:white;
+  transform:rotate(45deg);
+  position:relative;
+}
+.heart::before,
+.heart::after{
+  content:"";
+  position:absolute;
+  width:22px;
+  height:22px;
+  background:white;
+  border-radius:50%;
+}
+.heart::before{left:-11px;top:0}
+.heart::after{left:0;top:-11px}
 
-    /* top flap (opens a bit on click) */
-    .flap{
-      position:absolute;
-      left:0; right:0; top:-2px;
-      margin:auto;
-      width:0; height:0;
-      border-left:260px solid transparent;
-      border-right:260px solid transparent;
-      border-bottom:170px solid #ffffff;
-      transform-origin: top center;
-      transform: rotateX(0deg);
-      transition: transform .6s ease;
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,.08));
-    }
+.wiggle{
+  animation:wiggle .5s;
+}
+@keyframes wiggle{
+  0%{transform:translateX(-50%) rotate(0)}
+  25%{transform:translateX(-50%) rotate(-8deg)}
+  50%{transform:translateX(-50%) rotate(8deg)}
+  75%{transform:translateX(-50%) rotate(-4deg)}
+  100%{transform:translateX(-50%) rotate(0)}
+}
 
-    /* heart seal button */
-    .seal{
-      position:absolute;
-      left:0; right:0;
-      margin:auto;
-      top:140px;
-      width:62px; height:62px;
-      border-radius:18px;
-      background: linear-gradient(135deg, var(--pink), var(--pink2));
-      box-shadow: 0 14px 28px rgba(233,75,122,.25);
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      border:1px solid rgba(255,255,255,.45);
-      transition: transform .18s ease, filter .18s ease;
-      user-select:none;
-    }
-    .seal:hover{ transform: translateY(-2px); filter:saturate(1.1); }
-    .seal:active{ transform: translateY(0) scale(.98); }
+/* ===== LETTER ===== */
+.letter{
+  position:absolute;
+  bottom:80px;
+  left:50%;
+  transform:translateX(-50%) translateY(140px);
+  width:460px;
+  height:260px;
+  background:#fffdfb;
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.15);
+  padding:18px;
+  opacity:0;
+  z-index:5;
+  transition:transform .8s ease, opacity .6s ease;
+}
 
-    .seal .h{
-      width:22px; height:22px;
-      background:#fff;
-      transform: rotate(45deg);
-      border-radius:4px;
-      position:relative;
-      box-shadow: 0 6px 12px rgba(0,0,0,.12);
-    }
-    .seal .h:before, .seal .h:after{
-      content:"";
-      position:absolute;
-      width:22px; height:22px;
-      background:#fff;
-      border-radius:50%;
-    }
-    .seal .h:before{ left:-11px; top:0; }
-    .seal .h:after{ left:0; top:-11px; }
+.letter h2{
+  margin:0 0 10px;
+}
+.letter p{
+  line-height:1.8;
+}
 
-    /* heart wiggle animation */
-    .seal.wiggle{ animation: wiggle .55s ease; }
-    @keyframes wiggle{
-      0%{ transform: translateY(0) rotate(0deg) }
-      20%{ transform: translateY(-2px) rotate(-6deg) }
-      40%{ transform: translateY(0) rotate(6deg) }
-      60%{ transform: translateY(-2px) rotate(-4deg) }
-      80%{ transform: translateY(0) rotate(4deg) }
-      100%{ transform: translateY(0) rotate(0deg) }
-    }
+button{
+  margin-top:10px;
+  padding:10px 14px;
+  border:none;
+  border-radius:12px;
+  background:#ff5c8a;
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+}
 
-    /* Letters */
-    .letter{
-      position:absolute;
-      left:0; right:0;
-      margin:auto;
-      width:min(470px, 86vw);
-      height: 265px;
-      bottom:60px;
-      background: var(--paper);
-      border:1px solid var(--stroke);
-      border-radius:18px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.10);
-      transform: translateY(140px);
-      opacity:0;
-      transition: transform .75s ease, opacity .55s ease;
-      overflow:hidden;
-    }
-    .letter .header{
-      padding:14px 16px;
-      border-bottom:1px dashed rgba(0,0,0,.10);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:8px 12px;
-      background: rgba(233,75,122,.10);
-      border:1px solid rgba(233,75,122,.20);
-      border-radius:999px;
-      font-weight:800;
-      font-size:13px;
-    }
-    .small{ font-size:13px; opacity:.8; }
+/* ===== INNER LETTER ===== */
+.inner{
+  margin-top:10px;
+  background:#fff;
+  border-radius:14px;
+  padding:12px;
+  display:none;
+  border:1px dashed #ffb3c7;
+}
 
-    .letter .content{
-      padding:16px;
-      line-height:1.9;
-      font-size: 15px;
-    }
+/* ===== OPEN STATE ===== */
+.opened .flap{
+  transform:rotateX(65deg);
+}
 
-    .btnrow{
-      margin-top:10px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    button{
-      border:none;
-      border-radius:14px;
-      padding:11px 13px;
-      font-weight:800;
-      cursor:pointer;
-      transition:.18s transform, .18s filter;
-      box-shadow: 0 10px 24px rgba(0,0,0,.10);
-    }
-    button:hover{ transform: translateY(-2px); filter:saturate(1.1); }
-    button:active{ transform: translateY(0px) scale(.98); }
-    .primary{ background:linear-gradient(135deg, var(--pink), var(--pink2)); color:#fff; }
-    .ghost{ background:rgba(255,255,255,.85); border:1px solid rgba(0,0,0,.06); color:var(--ink); }
+.opened .envelope{
+  transform:translateX(-50%) translateY(30px);
+}
 
-    /* nested letter inside first letter */
-    .inner{
-      position:absolute;
-      left:16px; right:16px;
-      bottom:16px;
-      height: 0px;
-      overflow:hidden;
-      border-radius:16px;
-      background: rgba(255,255,255,.7);
-      border:1px solid rgba(0,0,0,.08);
-      transition: height .7s ease;
-    }
-    .inner .innerPad{
-      padding:14px 14px 10px;
-      line-height:1.9;
-      font-size:14px;
-    }
-
-    .innerSeal{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(233,75,122,.22);
-      background: rgba(233,75,122,.08);
-      cursor:pointer;
-      user-select:none;
-      font-weight:900;
-    }
-    .innerSeal .miniHeart{
-      width:14px; height:14px;
-      background: var(--pink);
-      transform: rotate(45deg);
-      border-radius:3px;
-      position:relative;
-    }
-    .innerSeal .miniHeart:before, .innerSeal .miniHeart:after{
-      content:"";
-      position:absolute;
-      width:14px; height:14px;
-      background: var(--pink);
-      border-radius:50%;
-    }
-    .innerSeal .miniHeart:before{ left:-7px; top:0; }
-    .innerSeal .miniHeart:after{ left:0; top:-7px; }
-
-    /* states when opened */
-    .opened .flap{ transform: rotateX(55deg); }
-    .opened .envelope{ transform: translateY(26px); }
-    .opened .letter{
-      transform: translateY(-10px);
-      opacity:1;
-    }
-
-    .innerOpen .inner{ height: 148px; } /* shows inner letter area */
-
-    /* footer note */
-    .note{
-      margin-top:14px;
-      text-align:center;
-      font-size:13px;
-      opacity:.78;
-    }
-  </style>
+.opened .letter{
+  transform:translateX(-50%) translateY(-80px);
+  opacity:1;
+  z-index:50; /* 🔥 هاي أهم سطر */
+}
+</style>
 </head>
+
 <body>
 
-  <div class="stars"></div>
-  <div class="floaters" id="floaters"></div>
+<div class="scene" id="scene">
 
-  <div class="wrap">
-    <div class="title">
-      <h1>💌 ظرف أسرار — Secret Envelope</h1>
-      <p>اكبس على القلب… وخلّي السحر يبلّش ✨ / Tap the heart to begin.</p>
-    </div>
+  <div class="letter" id="letter">
+    <h2>💌 First Letter</h2>
+    <p>
+      I have a secret…  
+      وبالعربي: <b>في أشياء حلوة بتطلع لما نفتح القلب.</b>
+    </p>
+    <button onclick="toggleInner()">افتح الورقة اللي جواها</button>
 
-    <div class="scene" id="scene">
-      <!-- Letter that comes out -->
-      <div class="letter" id="letter">
-        <div class="header">
-          <div class="pill">🎀 الرسالة الأولى — First Letter</div>
-          <div class="small" id="status">مقفلة 🔒</div>
-        </div>
-
-        <div class="content">
-          <div style="font-weight:900; font-size:17px; margin-bottom:6px;">
-            “You make my day softer… and my heart louder.” 💗
-          </div>
-
-          <div>
-            بالعربي: <b>وجودك بيخلّي كل شي ألطف.</b>  
-            وصدقيني… هذا بس أول سر 😌
-          </div>
-
-          <div class="btnrow">
-            <button class="ghost" onclick="toggleInner()">افتح الرسالة اللي جواها — Open Inside</button>
-            <button class="primary" onclick="nextHint()">Next Hint ✨</button>
-          </div>
-
-          <!-- nested inner letter -->
-          <div class="inner" id="inner">
-            <div class="innerPad">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                <div class="pill">📄 رسالة داخل رسالة — Letter inside</div>
-                <span class="innerSeal" onclick="revealDeep()">
-                  <span class="miniHeart"></span>
-                  اكبس القلب الصغير — Tap mini heart
-                </span>
-              </div>
-
-              <div id="deepText" style="display:none; margin-top:10px;">
-                <div style="font-weight:900; font-size:15px;">
-                  If you reached here… you’re officially my favorite person 😭❤️
-                </div>
-                <div style="margin-top:6px;">
-                  هسا صار عندك خيارين (زي لعبة):  
-                  <b>Continue ❤️</b> أو <b>Mystery 🙈</b>
-                </div>
-                <div class="btnrow" style="margin-top:10px;">
-                  <button class="primary" onclick="alert('مسار Continue جاهز! إذا بدك أحوّله لصفحات/مراحل زي لعبتك القديمة احكيلي وببنيه داخل نفس الظرف 👌')">Continue ❤️</button>
-                  <button class="ghost" onclick="alert('مسار Mystery جاهز! بنضيف لغز/كود قفل… احكيلي شو نوع اللغز بدك 😄')">Mystery 🙈</button>
-                </div>
-              </div>
-
-              <div id="deepHint" class="small" style="margin-top:10px;">
-                (هي الرسالة الثانية… بس لسه في “السر الحقيقي” 😉)
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Envelope -->
-      <div class="envelope" id="envelope">
-        <div class="env-front">
-          <div class="triangle-left"></div>
-          <div class="triangle-right"></div>
-          <div class="triangle-bottom"></div>
-          <div class="flap" id="flap"></div>
-
-          <div class="seal" id="seal" title="اضغط القلب">
-            <div class="h"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="note">
-      إذا بدك “ورقة داخل ورقة” أكثر (3 طبقات ورا بعض) بعملها لك بنفس الحركة 🤍
+    <div class="inner" id="inner">
+      <p>
+        😭❤️ If you reached here…  
+        you’re officially special.
+      </p>
     </div>
   </div>
 
-  <script>
-    // floating hearts
-    const floaters = document.getElementById("floaters");
-    function spawnHeart(){
-      const h = document.createElement("div");
-      h.className = "heart-f";
-      h.style.left = Math.random()*100 + "vw";
-      h.style.animationDuration = (5 + Math.random()*5) + "s";
-      h.style.opacity = (0.35 + Math.random()*0.6).toFixed(2);
-      h.style.transform = `rotate(45deg) scale(${0.75 + Math.random()*0.9})`;
-      floaters.appendChild(h);
-      setTimeout(()=> h.remove(), 11000);
-    }
-    setInterval(spawnHeart, 420);
-    for(let i=0;i<10;i++) setTimeout(spawnHeart, i*140);
+  <div class="envelope" id="envelope">
+    <div class="flap"></div>
+    <div class="bottom"></div>
+  </div>
 
-    const scene = document.getElementById("scene");
-    const seal = document.getElementById("seal");
-    const status = document.getElementById("status");
-    const inner = document.getElementById("inner");
-    const deepText = document.getElementById("deepText");
-    const deepHint = document.getElementById("deepHint");
+  <div class="heart-btn" id="heart">
+    <div class="heart"></div>
+  </div>
 
-    let openedOnce = false;
+</div>
 
-    seal.addEventListener("click", () => {
-      // wiggle the heart seal
-      seal.classList.remove("wiggle");
-      void seal.offsetWidth; // restart animation
-      seal.classList.add("wiggle");
+<script>
+const scene = document.getElementById("scene");
+const heart = document.getElementById("heart");
+const inner = document.getElementById("inner");
 
-      // open envelope and show letter
-      scene.classList.add("opened");
-      status.textContent = "مفتوحة ✅ / Opened";
-      openedOnce = true;
-    });
+heart.onclick = () => {
+  heart.classList.remove("wiggle");
+  void heart.offsetWidth;
+  heart.classList.add("wiggle");
+  scene.classList.add("opened");
+};
 
-    function toggleInner(){
-      if(!openedOnce){
-        // if user tries before opening
-        seal.click();
-        return;
-      }
-      scene.classList.toggle("innerOpen");
-      deepText.style.display = "none";
-      deepHint.textContent = "(اكبس القلب الصغير جوّا لتفتح السر الأعمق 😉)";
-    }
+function toggleInner(){
+  inner.style.display =
+    inner.style.display === "block" ? "none" : "block";
+}
+</script>
 
-    function revealDeep(){
-      if(!scene.classList.contains("innerOpen")) scene.classList.add("innerOpen");
-      deepText.style.display = deepText.style.display === "none" ? "block" : "none";
-      deepHint.textContent = "🔥 وصلت للعمق… هون منبني المسارات اللي بدك إياها.";
-    }
-
-    function nextHint(){
-      if(!openedOnce){
-        seal.click();
-        return;
-      }
-      alert("Hint: كل ما تفتح طبقة… رح تلاقي طبقة ألطف ✨\nIf you want, I’ll add 3rd & 4th nested papers.");
-    }
-  </script>
 </body>
 </html>
