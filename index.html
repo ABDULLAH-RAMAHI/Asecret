@@ -1,230 +1,717 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secret Envelope 💌</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gift Box Puzzle 💝</title>
 <style>
-*{
-  box-sizing:border-box;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-}
+  :root{
+    --bg1:#ffd6e7;
+    --bg2:#fff1f7;
+    --ink:#2b1b2a;
 
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background: linear-gradient(135deg,#ffd6e7,#fff1f7);
-  overflow:hidden;
-}
+    --pink:#e94b7a;
+    --pink2:#ff6fa0;
 
-/* ===== SCENE ===== */
-.scene{
-  position:relative;
-  width:520px;
-  height:420px;
-}
+    --wood1:#8a4e2e;
+    --wood2:#6e3c23;
+    --gold1:#f7d26a;
+    --gold2:#d6a93f;
 
-/* ===== ENVELOPE ===== */
-.envelope{
-  position:absolute;
-  bottom:40px;
-  left:50%;
-  transform:translateX(-50%);
-  width:520px;
-  height:300px;
-  background:white;
-  border-radius:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.15);
-  z-index:10;
-  transition:transform .6s ease;
-  overflow:hidden;
-}
+    --shadow: 0 24px 80px rgba(0,0,0,.14);
+  }
 
-/* flap */
-.flap{
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:150px;
-  background:#fff;
-  clip-path: polygon(0 0,100% 0,50% 100%);
-  transform-origin:top;
-  transition:transform .6s ease;
-}
+  *{ box-sizing:border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  body{
+    margin:0;
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    background:
+      radial-gradient(1200px 800px at 20% 10%, #ffe2f0 0%, transparent 60%),
+      radial-gradient(1000px 700px at 80% 30%, #ffd0e3 0%, transparent 55%),
+      linear-gradient(135deg, var(--bg1), var(--bg2));
+    color:var(--ink);
+    overflow:hidden;
+  }
 
-/* bottom */
-.bottom{
-  position:absolute;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:160px;
-  background:#f7c1d7;
-  clip-path: polygon(0 100%,100% 100%,50% 0);
-}
+  /* soft floating hearts */
+  .floaters{ position:fixed; inset:0; pointer-events:none; overflow:hidden; opacity:.75; }
+  .heart-f{
+    position:absolute;
+    width:14px; height:14px;
+    background:var(--pink2);
+    transform: rotate(45deg);
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,.12));
+    animation: rise linear infinite;
+    border-radius:3px;
+  }
+  .heart-f:before, .heart-f:after{
+    content:"";
+    position:absolute;
+    width:14px; height:14px;
+    background:inherit;
+    border-radius:50%;
+  }
+  .heart-f:before{ left:-7px; top:0; }
+  .heart-f:after{ left:0; top:-7px; }
+  @keyframes rise{
+    from{ transform:translateY(110vh) rotate(45deg) scale(.9); opacity:0; }
+    10%{ opacity:.95; }
+    to{ transform:translateY(-20vh) rotate(45deg) scale(1.2); opacity:0; }
+  }
 
-/* ===== HEART BUTTON ===== */
-.heart-btn{
-  position:absolute;
-  top:130px;
-  left:50%;
-  transform:translateX(-50%);
-  width:60px;
-  height:60px;
-  background:#ff5c8a;
-  border-radius:16px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  box-shadow:0 12px 30px rgba(255,92,138,.4);
-  z-index:20;
-}
+  .wrap{
+    width:min(980px, 94vw);
+    padding:22px;
+    display:grid;
+    place-items:center;
+    gap:14px;
+  }
 
-.heart{
-  width:22px;
-  height:22px;
-  background:white;
-  transform:rotate(45deg);
-  position:relative;
-}
-.heart::before,
-.heart::after{
-  content:"";
-  position:absolute;
-  width:22px;
-  height:22px;
-  background:white;
-  border-radius:50%;
-}
-.heart::before{left:-11px;top:0}
-.heart::after{left:0;top:-11px}
+  .title{
+    text-align:center;
+    margin-bottom:6px;
+  }
+  .title h1{
+    margin:0;
+    font-size: clamp(20px, 3.8vw, 36px);
+    line-height:1.2;
+  }
+  .title p{
+    margin:8px 0 0;
+    line-height:1.8;
+    font-size: clamp(13px, 2.2vw, 16px);
+    opacity:.9;
+  }
 
-.wiggle{
-  animation:wiggle .5s;
-}
-@keyframes wiggle{
-  0%{transform:translateX(-50%) rotate(0)}
-  25%{transform:translateX(-50%) rotate(-8deg)}
-  50%{transform:translateX(-50%) rotate(8deg)}
-  75%{transform:translateX(-50%) rotate(-4deg)}
-  100%{transform:translateX(-50%) rotate(0)}
-}
+  /* ======= STAGE CONTAINER ======= */
+  .stage{
+    width:min(820px, 94vw);
+    background: rgba(255,255,255,.68);
+    border: 1px solid rgba(255,255,255,.75);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+    backdrop-filter: blur(10px);
+  }
 
-/* ===== LETTER ===== */
-.letter{
-  position:absolute;
-  bottom:80px;
-  left:50%;
-  transform:translateX(-50%) translateY(140px);
-  width:460px;
-  height:260px;
-  background:#fffdfb;
-  border-radius:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,.15);
-  padding:18px;
-  opacity:0;
-  z-index:5;
-  transition:transform .8s ease, opacity .6s ease;
-}
+  .hint{
+    font-size:13px;
+    opacity:.85;
+    margin-top:10px;
+    text-align:center;
+  }
 
-.letter h2{
-  margin:0 0 10px;
-}
-.letter p{
-  line-height:1.8;
-}
+  /* ======= GAME AREA ======= */
+  .gameArea{
+    position:relative;
+    height:420px;
+    border-radius:18px;
+    background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.25));
+    border:1px solid rgba(0,0,0,.06);
+    overflow:hidden;
+  }
 
-button{
-  margin-top:10px;
-  padding:10px 14px;
-  border:none;
-  border-radius:12px;
-  background:#ff5c8a;
-  color:white;
-  font-weight:700;
-  cursor:pointer;
-}
+  .floorBtn{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background: rgba(255,255,255,.82);
+    border:1px solid rgba(0,0,0,.08);
+    border-radius: 14px;
+    padding:10px 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.10);
+  }
 
-/* ===== INNER LETTER ===== */
-.inner{
-  margin-top:10px;
-  background:#fff;
-  border-radius:14px;
-  padding:12px;
-  display:none;
-  border:1px dashed #ffb3c7;
-}
+  button{
+    border:none;
+    border-radius:12px;
+    padding:10px 12px;
+    font-weight:900;
+    cursor:pointer;
+    transition:.18s transform, .18s filter, .18s opacity;
+    box-shadow: 0 10px 24px rgba(0,0,0,.10);
+  }
+  button:hover{ transform: translateY(-2px); filter:saturate(1.1); }
+  button:active{ transform: translateY(0) scale(.98); }
 
-/* ===== OPEN STATE ===== */
-.opened .flap{
-  transform:rotateX(65deg);
-}
+  .primary{ background: linear-gradient(135deg, var(--pink), var(--pink2)); color:#fff; }
+  .ghost{ background: rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.06); color:var(--ink); }
 
-.opened .envelope{
-  transform:translateX(-50%) translateY(30px);
-}
+  .status{
+    font-size:13px;
+    opacity:.85;
+    white-space:nowrap;
+  }
 
-.opened .letter{
-  transform:translateX(-50%) translateY(-80px);
-  opacity:1;
-  z-index:50; /* 🔥 هاي أهم سطر */
-}
+  /* ======= BOX (DRAGGABLE) ======= */
+  .boxWrap{
+    position:absolute;
+    left:50%;
+    top:48%;
+    transform: translate(-50%, -50%);
+    width: 360px;
+    height: 240px;
+    cursor: grab;
+    user-select:none;
+    touch-action:none;
+  }
+  .boxWrap:active{ cursor:grabbing; }
+
+  .boxGlow{
+    position:absolute;
+    inset:-60px;
+    border-radius:40px;
+    background: radial-gradient(closest-side, rgba(247,210,106,.55), transparent 70%);
+    filter: blur(2px);
+    opacity:0;
+    transition: opacity .6s ease;
+    pointer-events:none;
+  }
+  .opened .boxGlow{ opacity:1; }
+
+  .box{
+    position:absolute;
+    inset:0;
+    border-radius: 20px;
+    background: linear-gradient(180deg, var(--wood1), var(--wood2));
+    border: 6px solid rgba(214,169,63,.85);
+    box-shadow: 0 20px 55px rgba(0,0,0,.18);
+    overflow:hidden;
+  }
+
+  /* lid */
+  .lid{
+    position:absolute;
+    left:0; right:0;
+    top:-6px;
+    height: 44%;
+    border-radius: 20px 20px 16px 16px;
+    background: linear-gradient(180deg, #9a5a35, #6e3c23);
+    border-bottom: 6px solid rgba(214,169,63,.85);
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    transition: transform .75s ease;
+  }
+  .opened .lid{ transform: rotateX(68deg); }
+
+  /* lock plate */
+  .lockPlate{
+    position:absolute;
+    left:50%;
+    top:44%;
+    transform: translate(-50%, -50%);
+    width: 74px;
+    height: 92px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--gold1), var(--gold2));
+    border: 2px solid rgba(0,0,0,.08);
+    box-shadow: 0 12px 26px rgba(0,0,0,.16);
+    display:grid;
+    place-items:center;
+  }
+  .keyhole{
+    width:22px; height:22px;
+    border-radius: 12px;
+    border:3px solid rgba(60,30,10,.65);
+    position:relative;
+  }
+  .keyhole:after{
+    content:"";
+    position:absolute;
+    left:50%; top:72%;
+    transform: translate(-50%, -50%);
+    width:8px; height:16px;
+    background: rgba(60,30,10,.65);
+    border-radius: 0 0 6px 6px;
+  }
+
+  /* ======= KEY (APPEARS + PICK UP) ======= */
+  .key{
+    position:absolute;
+    left:50%;
+    bottom:78px;
+    transform: translateX(-50%) translateY(40px) scale(.95);
+    width: 220px;
+    height: 70px;
+    opacity:0;
+    pointer-events:none;
+    transition: transform .55s ease, opacity .35s ease;
+    filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
+  }
+  .key.show{
+    opacity:1;
+    transform: translateX(-50%) translateY(0px) scale(1);
+    pointer-events:auto;
+    cursor:pointer;
+  }
+
+  /* key drawing */
+  .key .bar{
+    position:absolute;
+    left:40px;
+    top:28px;
+    width: 140px;
+    height: 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold1), var(--gold2));
+    border:1px solid rgba(0,0,0,.10);
+  }
+  .key .head{
+    position:absolute;
+    left:0;
+    top:18px;
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--gold1), var(--gold2));
+    border:1px solid rgba(0,0,0,.10);
+  }
+  .key .hole{
+    position:absolute;
+    left:14px;
+    top:32px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.6);
+    border:2px solid rgba(0,0,0,.18);
+  }
+  .key .teeth{
+    position:absolute;
+    right:0;
+    top:22px;
+    width: 50px;
+    height: 30px;
+  }
+  .tooth{
+    position:absolute;
+    bottom:0;
+    width: 12px;
+    height: 18px;
+    background: linear-gradient(135deg, var(--gold1), var(--gold2));
+    border:1px solid rgba(0,0,0,.10);
+    border-radius: 6px;
+  }
+  .tooth.t1{ right:0; height:18px; }
+  .tooth.t2{ right:14px; height:12px; }
+  .tooth.t3{ right:28px; height:20px; }
+
+  /* pickup animation */
+  .key.picked{
+    opacity:0;
+    transform: translateX(-50%) translateY(-40px) scale(.95);
+    pointer-events:none;
+  }
+
+  /* ======= ENVELOPE APPEAR ======= */
+  .envelopeStage{
+    display:none;
+    margin-top:14px;
+    animation: pop .45s ease;
+  }
+  @keyframes pop{
+    from{ opacity:0; transform: translateY(10px) scale(.98); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+  .showEnvelope .envelopeStage{ display:block; }
+
+  /* ======= ENVELOPE UI ======= */
+  .scene{
+    position:relative;
+    width:min(560px, 92vw);
+    height: 420px;
+    margin: 0 auto;
+    display:grid;
+    place-items:center;
+  }
+
+  .envelope{
+    position:absolute;
+    width:min(520px, 92vw);
+    height: 300px;
+    bottom:30px;
+    border-radius:22px;
+    background: #fff;
+    box-shadow: var(--shadow);
+    border:1px solid rgba(0,0,0,.06);
+    overflow:visible;
+    transform: translateY(0);
+    transition: transform .5s ease;
+    z-index:10;
+  }
+  .triangle-left{
+    position:absolute; left:-2px; top:0;
+    width:0; height:0;
+    border-top:150px solid transparent;
+    border-bottom:150px solid transparent;
+    border-right:260px solid #f2f2f6;
+  }
+  .triangle-right{
+    position:absolute; right:-2px; top:0;
+    width:0; height:0;
+    border-top:150px solid transparent;
+    border-bottom:150px solid transparent;
+    border-left:260px solid #f2f2f6;
+  }
+  .triangle-bottom{
+    position:absolute;
+    left:0; right:0; bottom:-2px;
+    margin:auto;
+    width:0; height:0;
+    border-left:260px solid transparent;
+    border-right:260px solid transparent;
+    border-top:170px solid rgba(233,75,122,.10);
+    opacity:.85;
+  }
+  .flap{
+    position:absolute;
+    left:0; right:0; top:-2px;
+    margin:auto;
+    width:0; height:0;
+    border-left:260px solid transparent;
+    border-right:260px solid transparent;
+    border-bottom:170px solid #fff;
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    transition: transform .6s ease;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.08));
+  }
+
+  .seal{
+    position:absolute;
+    left:0; right:0;
+    margin:auto;
+    top:140px;
+    width:62px; height:62px;
+    border-radius:18px;
+    background: linear-gradient(135deg, var(--pink), var(--pink2));
+    box-shadow: 0 14px 28px rgba(233,75,122,.25);
+    display:grid;
+    place-items:center;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,.45);
+    user-select:none;
+    z-index:20;
+  }
+  .seal .h{
+    width:22px; height:22px;
+    background:#fff;
+    transform: rotate(45deg);
+    border-radius:4px;
+    position:relative;
+    box-shadow: 0 6px 12px rgba(0,0,0,.12);
+  }
+  .seal .h:before, .seal .h:after{
+    content:"";
+    position:absolute;
+    width:22px; height:22px;
+    background:#fff;
+    border-radius:50%;
+  }
+  .seal .h:before{ left:-11px; top:0; }
+  .seal .h:after{ left:0; top:-11px; }
+
+  .seal.wiggle{ animation: wiggle .55s ease; }
+  @keyframes wiggle{
+    0%{ transform: translateY(0) rotate(0deg) }
+    20%{ transform: translateY(-2px) rotate(-6deg) }
+    40%{ transform: translateY(0) rotate(6deg) }
+    60%{ transform: translateY(-2px) rotate(-4deg) }
+    80%{ transform: translateY(0) rotate(4deg) }
+    100%{ transform: translateY(0) rotate(0deg) }
+  }
+
+  .letter{
+    position:absolute;
+    left:0; right:0;
+    margin:auto;
+    width:min(470px, 86vw);
+    height: 265px;
+    bottom:60px;
+    background: #fffdfb;
+    border:1px solid rgba(0,0,0,.08);
+    border-radius:18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.10);
+    transform: translateY(140px);
+    opacity:0;
+    transition: transform .75s ease, opacity .55s ease;
+    overflow:hidden;
+    z-index:5;
+  }
+  .letter .header{
+    padding:14px 16px;
+    border-bottom:1px dashed rgba(0,0,0,.10);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 12px;
+    background: rgba(233,75,122,.10);
+    border:1px solid rgba(233,75,122,.20);
+    border-radius:999px;
+    font-weight:900;
+    font-size:13px;
+  }
+  .small{ font-size:13px; opacity:.8; }
+
+  .letter .content{
+    padding:16px;
+    line-height:1.9;
+    font-size: 15px;
+  }
+
+  .inner{
+    position:absolute;
+    left:16px; right:16px;
+    bottom:16px;
+    height:0px;
+    overflow:hidden;
+    border-radius:16px;
+    background: rgba(255,255,255,.75);
+    border:1px solid rgba(0,0,0,.08);
+    transition: height .7s ease;
+  }
+  .inner .innerPad{ padding:14px; line-height:1.9; font-size:14px; }
+
+  .openedEnv .flap{ transform: rotateX(55deg); }
+  .openedEnv .envelope{ transform: translateY(26px); }
+  .openedEnv .letter{
+    transform: translateY(-10px);
+    opacity:1;
+    z-index:50; /* مهم عشان ما تصير ورا الظرف */
+  }
+  .innerOpen .inner{ height: 150px; }
+
 </style>
 </head>
-
 <body>
 
-<div class="scene" id="scene">
+<div class="floaters" id="floaters"></div>
 
-  <div class="letter" id="letter">
-    <h2>💌 First Letter</h2>
-    <p>
-      I have a secret…  
-      وبالعربي: <b>في أشياء حلوة بتطلع لما نفتح القلب.</b>
-    </p>
-    <button onclick="toggleInner()">افتح الورقة اللي جواها</button>
+<div class="wrap">
+  <div class="title">
+    <h1>🎁 Gift Box Puzzle — لغز صندوق الهدايا</h1>
+    <p>حرّك الصندوق… اكبس الزر… خذ المفتاح… وافتح السر 💛 / Drag, press, take the key.</p>
+  </div>
 
-    <div class="inner" id="inner">
-      <p>
-        😭❤️ If you reached here…  
-        you’re officially special.
-      </p>
+  <div class="stage" id="stageBox">
+    <div class="gameArea" id="gameArea">
+
+      <!-- Draggable Box -->
+      <div class="boxWrap" id="boxWrap" aria-label="Gift box draggable">
+        <div class="boxGlow"></div>
+        <div class="box">
+          <div class="lid"></div>
+          <div class="lockPlate"><div class="keyhole"></div></div>
+        </div>
+      </div>
+
+      <!-- Key -->
+      <div class="key" id="key">
+        <div class="head"></div>
+        <div class="hole"></div>
+        <div class="bar"></div>
+        <div class="teeth">
+          <div class="tooth t1"></div>
+          <div class="tooth t2"></div>
+          <div class="tooth t3"></div>
+        </div>
+      </div>
+
+      <!-- Button below -->
+      <div class="floorBtn">
+        <button class="primary" id="btnKey">طلّع المفتاح — Reveal Key</button>
+        <div class="status" id="status">🔒 الصندوق مقفل</div>
+      </div>
+    </div>
+
+    <div class="hint" id="hint">
+      1) حرّك الصندوق بالماوس 🖱️ &nbsp; 2) كبس الزر &nbsp; 3) اضغط على المفتاح عشان “تأخذه”
     </div>
   </div>
 
-  <div class="envelope" id="envelope">
-    <div class="flap"></div>
-    <div class="bottom"></div>
-  </div>
+  <!-- Envelope Stage -->
+  <div class="stage envelopeStage" id="envStage">
+    <div class="title" style="margin-bottom:10px;">
+      <h1>💌 Secret Envelope — ظرف أسرار</h1>
+      <p>اكبس القلب… وخلي السحر يبلّش ✨ / Tap the heart to begin.</p>
+    </div>
 
-  <div class="heart-btn" id="heart">
-    <div class="heart"></div>
+    <div class="scene" id="envScene">
+      <div class="letter" id="letter">
+        <div class="header">
+          <div class="pill">🎀 الرسالة الأولى — First Letter</div>
+          <div class="small">مفتوحة ✅</div>
+        </div>
+
+        <div class="content">
+          <div style="font-weight:900; font-size:17px; margin-bottom:6px;">
+            “You make my day softer… and my heart louder.” 💗
+          </div>
+          <div>
+            بالعربي: <b>وجودك بيخلّي كل شي ألطف.</b>  
+            وصدقيني… هذا بس أول سر 😌
+          </div>
+
+          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="ghost" id="openInside">افتح اللي جواها — Open Inside</button>
+            <button class="primary" onclick="alert('إذا بدك أكملها لمسارات (Continue/Mystery) جوّا الظرف… احكيلي وبكمّلها بنفس الستايل 👌')">التالي — Next ✨</button>
+          </div>
+
+          <div class="inner" id="inner">
+            <div class="innerPad">
+              <div style="font-weight:900; margin-bottom:6px;">📄 رسالة داخل رسالة — Nested</div>
+              <div>
+                If you reached here… you’re officially my favorite person 😭❤️
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="envelope" id="envelope">
+        <div class="triangle-left"></div>
+        <div class="triangle-right"></div>
+        <div class="triangle-bottom"></div>
+        <div class="flap" id="flap"></div>
+        <div class="seal" id="seal" title="اضغط القلب">
+          <div class="h"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
 
 <script>
-const scene = document.getElementById("scene");
-const heart = document.getElementById("heart");
-const inner = document.getElementById("inner");
+  // ===== floating hearts =====
+  const floaters = document.getElementById("floaters");
+  function spawnHeart(){
+    const h = document.createElement("div");
+    h.className = "heart-f";
+    h.style.left = Math.random()*100 + "vw";
+    h.style.animationDuration = (5 + Math.random()*5) + "s";
+    h.style.opacity = (0.35 + Math.random()*0.6).toFixed(2);
+    h.style.transform = `rotate(45deg) scale(${0.75 + Math.random()*0.9})`;
+    floaters.appendChild(h);
+    setTimeout(()=> h.remove(), 11000);
+  }
+  setInterval(spawnHeart, 420);
+  for(let i=0;i<10;i++) setTimeout(spawnHeart, i*140);
 
-heart.onclick = () => {
-  heart.classList.remove("wiggle");
-  void heart.offsetWidth;
-  heart.classList.add("wiggle");
-  scene.classList.add("opened");
-};
+  // ===== draggable box =====
+  const boxWrap = document.getElementById("boxWrap");
+  const gameArea = document.getElementById("gameArea");
 
-function toggleInner(){
-  inner.style.display =
-    inner.style.display === "block" ? "none" : "block";
-}
+  let isDrag = false, startX=0, startY=0, boxX=0, boxY=0;
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  boxWrap.addEventListener("pointerdown", (e) => {
+    isDrag = true;
+    boxWrap.setPointerCapture(e.pointerId);
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = boxWrap.getBoundingClientRect();
+    const parent = gameArea.getBoundingClientRect();
+    boxX = rect.left - parent.left;
+    boxY = rect.top - parent.top;
+  });
+
+  boxWrap.addEventListener("pointermove", (e) => {
+    if(!isDrag) return;
+    const parent = gameArea.getBoundingClientRect();
+    const newX = boxX + (e.clientX - startX);
+    const newY = boxY + (e.clientY - startY);
+
+    // bounds inside gameArea
+    const maxX = parent.width - boxWrap.offsetWidth;
+    const maxY = parent.height - boxWrap.offsetHeight - 70; // keep above bottom button area
+
+    const cx = clamp(newX, 10, maxX-10);
+    const cy = clamp(newY, 10, maxY);
+
+    boxWrap.style.left = cx + "px";
+    boxWrap.style.top  = cy + "px";
+    boxWrap.style.transform = "translate(0,0)"; // override center transform after first move
+  });
+
+  boxWrap.addEventListener("pointerup", () => { isDrag = false; });
+
+  // ===== key logic =====
+  const btnKey = document.getElementById("btnKey");
+  const key = document.getElementById("key");
+  const status = document.getElementById("status");
+  const stageBox = document.getElementById("stageBox");
+  const envStage = document.getElementById("envStage");
+
+  let keyRevealed = false;
+  let keyPicked = false;
+  let boxOpened = false;
+
+  btnKey.addEventListener("click", () => {
+    if(boxOpened) return;
+    keyRevealed = true;
+    key.classList.add("show");
+    status.textContent = "🔑 المفتاح طلع… اضغطه وخذه";
+  });
+
+  key.addEventListener("click", () => {
+    if(!keyRevealed || keyPicked) return;
+    keyPicked = true;
+    key.classList.add("picked");
+    status.textContent = "✅ أخذت المفتاح… افتح الصندوق!";
+    // open box after short beat
+    setTimeout(openBox, 450);
+  });
+
+  function openBox(){
+    if(boxOpened) return;
+    boxOpened = true;
+    stageBox.classList.add("opened");
+    status.textContent = "✨ الصندوق انفتح!";
+
+    // after glow, reveal envelope stage
+    setTimeout(() => {
+      document.body.classList.add("showEnvelope");
+      envStage.classList.add("envelopeStage"); // just in case
+      envStage.style.display = "block";
+      envStage.scrollIntoView({behavior:"smooth", block:"start"});
+    }, 900);
+  }
+
+  // ===== envelope interactions =====
+  const envScene = document.getElementById("envScene");
+  const seal = document.getElementById("seal");
+  const openInside = document.getElementById("openInside");
+  const inner = document.getElementById("inner");
+
+  seal.addEventListener("click", () => {
+    seal.classList.remove("wiggle");
+    void seal.offsetWidth;
+    seal.classList.add("wiggle");
+    envScene.classList.add("openedEnv");
+  });
+
+  openInside.addEventListener("click", () => {
+    envScene.classList.toggle("innerOpen");
+  });
+
+  // hide envelope stage until box opened
+  envStage.style.display = "none";
 </script>
 
 </body>
