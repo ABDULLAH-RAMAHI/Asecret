@@ -69,10 +69,7 @@
     gap:14px;
   }
 
-  .title{
-    text-align:center;
-    margin-bottom:6px;
-  }
+  .title{ text-align:center; margin-bottom:6px; }
   .title h1{
     margin:0;
     font-size: clamp(20px, 3.8vw, 36px);
@@ -128,28 +125,10 @@
     border-radius: 14px;
     padding:10px 12px;
     box-shadow: 0 12px 30px rgba(0,0,0,.10);
+    z-index:5; /* ✅ عشان ما يغطي المفتاح */
   }
 
-  button{
-    border:none;
-    border-radius:12px;
-    padding:10px 12px;
-    font-weight:900;
-    cursor:pointer;
-    transition:.18s transform, .18s filter, .18s opacity;
-    box-shadow: 0 10px 24px rgba(0,0,0,.10);
-  }
-  button:hover{ transform: translateY(-2px); filter:saturate(1.1); }
-  button:active{ transform: translateY(0) scale(.98); }
-
-  .primary{ background: linear-gradient(135deg, var(--pink), var(--pink2)); color:#fff; }
-  .ghost{ background: rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.06); color:var(--ink); }
-
-  .status{
-    font-size:13px;
-    opacity:.85;
-    white-space:nowrap;
-  }
+  .status{ font-size:13px; opacity:.85; white-space:nowrap; }
 
   /* ======= BOX (DRAGGABLE) ======= */
   .boxWrap{
@@ -187,7 +166,6 @@
     overflow:hidden;
   }
 
-  /* lid */
   .lid{
     position:absolute;
     left:0; right:0;
@@ -202,7 +180,6 @@
   }
   .opened .lid{ transform: rotateX(68deg); }
 
-  /* lock plate */
   .lockPlate{
     position:absolute;
     left:50%;
@@ -242,7 +219,7 @@
     border-radius:14px;
     font-weight:900;
     font-size:13px;
-    background: rgba(255,255,255,.9);
+    background: rgba(255,255,255,.92);
     border:1px solid rgba(0,0,0,.10);
     box-shadow: 0 12px 28px rgba(0,0,0,.14);
     cursor:pointer;
@@ -253,18 +230,14 @@
     z-index:30;
     user-select:none;
   }
-  .secretBtn::before{
-    content:"✨";
-    margin-left:8px;
-  }
-  /* يظهر فقط بعد أول حركة للصندوق */
+  .secretBtn::before{ content:"✨"; margin-left:8px; }
   .boxMoved .secretBtn{
     opacity:1;
     transform: translateY(0) scale(1);
     pointer-events:auto;
   }
 
-  /* ======= KEY (APPEARS + PICK UP) ======= */
+  /* ======= KEY ======= */
   .key{
     position:absolute;
     left:50%;
@@ -276,6 +249,7 @@
     pointer-events:none;
     transition: transform .55s ease, opacity .35s ease;
     filter: drop-shadow(0 10px 18px rgba(0,0,0,.18));
+    z-index:40; /* ✅ فوق الشريط */
   }
   .key.show{
     opacity:1;
@@ -283,8 +257,6 @@
     pointer-events:auto;
     cursor:pointer;
   }
-
-  /* key drawing */
   .key .bar{
     position:absolute;
     left:40px;
@@ -335,7 +307,6 @@
   .tooth.t2{ right:14px; height:12px; }
   .tooth.t3{ right:28px; height:20px; }
 
-  /* pickup animation */
   .key.picked{
     opacity:0;
     transform: translateX(-50%) translateY(-40px) scale(.95);
@@ -354,178 +325,32 @@
   }
   .showEnvelope .envelopeStage{ display:block; }
 
-  /* ======= ENVELOPE UI ======= */
-  .scene{
-    position:relative;
-    width:min(560px, 92vw);
-    height: 420px;
-    margin: 0 auto;
-    display:grid;
-    place-items:center;
-  }
-
-  .envelope{
-    position:absolute;
-    width:min(520px, 92vw);
-    height: 300px;
-    bottom:30px;
-    border-radius:22px;
-    background: #fff;
-    box-shadow: var(--shadow);
-    border:1px solid rgba(0,0,0,.06);
-    overflow:visible;
-    transform: translateY(0);
-    transition: transform .5s ease;
-    z-index:10;
-  }
-  .triangle-left{
-    position:absolute; left:-2px; top:0;
-    width:0; height:0;
-    border-top:150px solid transparent;
-    border-bottom:150px solid transparent;
-    border-right:260px solid #f2f2f6;
-  }
-  .triangle-right{
-    position:absolute; right:-2px; top:0;
-    width:0; height:0;
-    border-top:150px solid transparent;
-    border-bottom:150px solid transparent;
-    border-left:260px solid #f2f2f6;
-  }
-  .triangle-bottom{
-    position:absolute;
-    left:0; right:0; bottom:-2px;
-    margin:auto;
-    width:0; height:0;
-    border-left:260px solid transparent;
-    border-right:260px solid transparent;
-    border-top:170px solid rgba(233,75,122,.10);
-    opacity:.85;
-  }
-  .flap{
-    position:absolute;
-    left:0; right:0; top:-2px;
-    margin:auto;
-    width:0; height:0;
-    border-left:260px solid transparent;
-    border-right:260px solid transparent;
-    border-bottom:170px solid #fff;
-    transform-origin: top center;
-    transform: rotateX(0deg);
-    transition: transform .6s ease;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,.08));
-  }
-
-  .seal{
-    position:absolute;
-    left:0; right:0;
-    margin:auto;
-    top:140px;
-    width:62px; height:62px;
-    border-radius:18px;
-    background: linear-gradient(135deg, var(--pink), var(--pink2));
-    box-shadow: 0 14px 28px rgba(233,75,122,.25);
-    display:grid;
-    place-items:center;
-    cursor:pointer;
-    border:1px solid rgba(255,255,255,.45);
-    user-select:none;
-    z-index:20;
-  }
-  .seal .h{
-    width:22px; height:22px;
-    background:#fff;
-    transform: rotate(45deg);
-    border-radius:4px;
-    position:relative;
-    box-shadow: 0 6px 12px rgba(0,0,0,.12);
-  }
-  .seal .h:before, .seal .h:after{
-    content:"";
-    position:absolute;
-    width:22px; height:22px;
-    background:#fff;
-    border-radius:50%;
-  }
+  /* ======= ENVELOPE UI (كما هي عندك) ======= */
+  .scene{ position:relative; width:min(560px, 92vw); height: 420px; margin: 0 auto; display:grid; place-items:center; }
+  .envelope{ position:absolute; width:min(520px, 92vw); height: 300px; bottom:30px; border-radius:22px; background: #fff; box-shadow: var(--shadow); border:1px solid rgba(0,0,0,.06); overflow:visible; transform: translateY(0); transition: transform .5s ease; z-index:10; }
+  .triangle-left{ position:absolute; left:-2px; top:0; width:0; height:0; border-top:150px solid transparent; border-bottom:150px solid transparent; border-right:260px solid #f2f2f6; }
+  .triangle-right{ position:absolute; right:-2px; top:0; width:0; height:0; border-top:150px solid transparent; border-bottom:150px solid transparent; border-left:260px solid #f2f2f6; }
+  .triangle-bottom{ position:absolute; left:0; right:0; bottom:-2px; margin:auto; width:0; height:0; border-left:260px solid transparent; border-right:260px solid transparent; border-top:170px solid rgba(233,75,122,.10); opacity:.85; }
+  .flap{ position:absolute; left:0; right:0; top:-2px; margin:auto; width:0; height:0; border-left:260px solid transparent; border-right:260px solid transparent; border-bottom:170px solid #fff; transform-origin: top center; transform: rotateX(0deg); transition: transform .6s ease; filter: drop-shadow(0 4px 10px rgba(0,0,0,.08)); }
+  .seal{ position:absolute; left:0; right:0; margin:auto; top:140px; width:62px; height:62px; border-radius:18px; background: linear-gradient(135deg, var(--pink), var(--pink2)); box-shadow: 0 14px 28px rgba(233,75,122,.25); display:grid; place-items:center; cursor:pointer; border:1px solid rgba(255,255,255,.45); user-select:none; z-index:20; }
+  .seal .h{ width:22px; height:22px; background:#fff; transform: rotate(45deg); border-radius:4px; position:relative; box-shadow: 0 6px 12px rgba(0,0,0,.12); }
+  .seal .h:before, .seal .h:after{ content:""; position:absolute; width:22px; height:22px; background:#fff; border-radius:50%; }
   .seal .h:before{ left:-11px; top:0; }
   .seal .h:after{ left:0; top:-11px; }
-
   .seal.wiggle{ animation: wiggle .55s ease; }
-  @keyframes wiggle{
-    0%{ transform: translateY(0) rotate(0deg) }
-    20%{ transform: translateY(-2px) rotate(-6deg) }
-    40%{ transform: translateY(0) rotate(6deg) }
-    60%{ transform: translateY(-2px) rotate(-4deg) }
-    80%{ transform: translateY(0) rotate(4deg) }
-    100%{ transform: translateY(0) rotate(0deg) }
-  }
+  @keyframes wiggle{ 0%{ transform: translateY(0) rotate(0deg) } 20%{ transform: translateY(-2px) rotate(-6deg) } 40%{ transform: translateY(0) rotate(6deg) } 60%{ transform: translateY(-2px) rotate(-4deg) } 80%{ transform: translateY(0) rotate(4deg) } 100%{ transform: translateY(0) rotate(0deg) } }
 
-  .letter{
-    position:absolute;
-    left:0; right:0;
-    margin:auto;
-    width:min(470px, 86vw);
-    height: 265px;
-    bottom:60px;
-    background: #fffdfb;
-    border:1px solid rgba(0,0,0,.08);
-    border-radius:18px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.10);
-    transform: translateY(140px);
-    opacity:0;
-    transition: transform .75s ease, opacity .55s ease;
-    overflow:hidden;
-    z-index:5;
-  }
-  .letter .header{
-    padding:14px 16px;
-    border-bottom:1px dashed rgba(0,0,0,.10);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-  }
-  .pill{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    padding:8px 12px;
-    background: rgba(233,75,122,.10);
-    border:1px solid rgba(233,75,122,.20);
-    border-radius:999px;
-    font-weight:900;
-    font-size:13px;
-  }
+  .letter{ position:absolute; left:0; right:0; margin:auto; width:min(470px, 86vw); height: 265px; bottom:60px; background: #fffdfb; border:1px solid rgba(0,0,0,.08); border-radius:18px; box-shadow: 0 20px 60px rgba(0,0,0,.10); transform: translateY(140px); opacity:0; transition: transform .75s ease, opacity .55s ease; overflow:hidden; z-index:5; }
+  .letter .header{ padding:14px 16px; border-bottom:1px dashed rgba(0,0,0,.10); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .pill{ display:inline-flex; align-items:center; gap:10px; padding:8px 12px; background: rgba(233,75,122,.10); border:1px solid rgba(233,75,122,.20); border-radius:999px; font-weight:900; font-size:13px; }
   .small{ font-size:13px; opacity:.8; }
-
-  .letter .content{
-    padding:16px;
-    line-height:1.9;
-    font-size: 15px;
-  }
-
-  .inner{
-    position:absolute;
-    left:16px; right:16px;
-    bottom:16px;
-    height:0px;
-    overflow:hidden;
-    border-radius:16px;
-    background: rgba(255,255,255,.75);
-    border:1px solid rgba(0,0,0,.08);
-    transition: height .7s ease;
-  }
+  .letter .content{ padding:16px; line-height:1.9; font-size: 15px; }
+  .inner{ position:absolute; left:16px; right:16px; bottom:16px; height:0px; overflow:hidden; border-radius:16px; background: rgba(255,255,255,.75); border:1px solid rgba(0,0,0,.08); transition: height .7s ease; }
   .inner .innerPad{ padding:14px; line-height:1.9; font-size:14px; }
-
   .openedEnv .flap{ transform: rotateX(55deg); }
   .openedEnv .envelope{ transform: translateY(26px); }
-  .openedEnv .letter{
-    transform: translateY(-10px);
-    opacity:1;
-    z-index:50;
-  }
+  .openedEnv .letter{ transform: translateY(-10px); opacity:1; z-index:50; }
   .innerOpen .inner{ height: 150px; }
-
 </style>
 </head>
 <body>
@@ -541,20 +366,16 @@
   <div class="stage" id="stageBox">
     <div class="gameArea" id="gameArea">
 
-      <!-- Draggable Box -->
       <div class="boxWrap" id="boxWrap" aria-label="Gift box draggable">
         <div class="boxGlow"></div>
-
         <div class="box">
           <div class="lid"></div>
           <div class="lockPlate"><div class="keyhole"></div></div>
         </div>
 
-        <!-- Secret button appears after moving -->
         <div class="secretBtn" id="secretBtn" title="Secret Button">زر مخفي</div>
       </div>
 
-      <!-- Key -->
       <div class="key" id="key">
         <div class="head"></div>
         <div class="hole"></div>
@@ -566,7 +387,6 @@
         </div>
       </div>
 
-      <!-- Status only (no reveal key button) -->
       <div class="floorBtn">
         <div class="status" id="status">حرّك الصندوق… راح يبين زر مخفي 👀</div>
       </div>
@@ -577,7 +397,6 @@
     </div>
   </div>
 
-  <!-- Envelope Stage -->
   <div class="stage envelopeStage" id="envStage">
     <div class="title" style="margin-bottom:10px;">
       <h1>💌 Secret Envelope — ظرف أسرار</h1>
@@ -608,9 +427,7 @@
           <div class="inner" id="inner">
             <div class="innerPad">
               <div style="font-weight:900; margin-bottom:6px;">📄 رسالة داخل رسالة — Nested</div>
-              <div>
-                If you reached here… you’re officially my favorite person 😭❤️
-              </div>
+              <div>If you reached here… you’re officially my favorite person 😭❤️</div>
             </div>
           </div>
         </div>
@@ -621,17 +438,14 @@
         <div class="triangle-right"></div>
         <div class="triangle-bottom"></div>
         <div class="flap" id="flap"></div>
-        <div class="seal" id="seal" title="اضغط القلب">
-          <div class="h"></div>
-        </div>
+        <div class="seal" id="seal" title="اضغط القلب"><div class="h"></div></div>
       </div>
     </div>
   </div>
-
 </div>
 
 <script>
-  // ===== floating hearts =====
+  // floating hearts
   const floaters = document.getElementById("floaters");
   function spawnHeart(){
     const h = document.createElement("div");
@@ -646,36 +460,20 @@
   setInterval(spawnHeart, 420);
   for(let i=0;i<10;i++) setTimeout(spawnHeart, i*140);
 
-  // ===== draggable box =====
+  // elements
   const boxWrap = document.getElementById("boxWrap");
   const gameArea = document.getElementById("gameArea");
-
-  let isDrag = false, startX=0, startY=0, boxX=0, boxY=0;
-
-  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-
-  boxWrap.addEventListener("pointerdown", (e) => {
-    isDrag = true;
-    boxWrap.setPointerCapture(e.pointerId);
-    startX = e.clientX;
-    startY = e.clientY;
-    const rect = boxWrap.getBoundingClientRect();
-    const parent = gameArea.getBoundingClientRect();
-    boxX = rect.left - parent.left;
-    boxY = rect.top - parent.top;
-  });
-
-  // ===== key logic =====
   const key = document.getElementById("key");
   const status = document.getElementById("status");
   const stageBox = document.getElementById("stageBox");
   const envStage = document.getElementById("envStage");
   const secretBtn = document.getElementById("secretBtn");
 
-  let keyRevealed = false;
-  let keyPicked = false;
-  let boxOpened = false;
+  let isDrag = false, startX=0, startY=0, boxX=0, boxY=0;
+  let keyRevealed = false, keyPicked = false, boxOpened = false;
   let movedOnce = false;
+
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
 
   function markMoved(){
     if(movedOnce) return;
@@ -684,18 +482,36 @@
     status.textContent = "👀 ظهر زر مخفي داخل الصندوق… اكبس عليه!";
   }
 
-  boxWrap.addEventListener("pointermove", (e) => {
-    if(!isDrag) return;
+  // ✅ أهم سطرين: نخلي كبسة الزر ما تتحول لدراغ
+  secretBtn.addEventListener("pointerdown", (e) => e.stopPropagation());
+  secretBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+
+  boxWrap.addEventListener("pointerdown", (e) => {
+    // ✅ إذا كبست على الزر المخفي، لا تعتبرها سحب
+    if (e.target.closest("#secretBtn")) return;
 
     markMoved();
+
+    isDrag = true;
+    boxWrap.setPointerCapture(e.pointerId);
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const rect = boxWrap.getBoundingClientRect();
+    const parent = gameArea.getBoundingClientRect();
+    boxX = rect.left - parent.left;
+    boxY = rect.top - parent.top;
+  });
+
+  boxWrap.addEventListener("pointermove", (e) => {
+    if(!isDrag) return;
 
     const parent = gameArea.getBoundingClientRect();
     const newX = boxX + (e.clientX - startX);
     const newY = boxY + (e.clientY - startY);
 
-    // bounds inside gameArea
     const maxX = parent.width - boxWrap.offsetWidth;
-    const maxY = parent.height - boxWrap.offsetHeight - 70; // keep above bottom bar
+    const maxY = parent.height - boxWrap.offsetHeight - 70;
 
     const cx = clamp(newX, 10, maxX-10);
     const cy = clamp(newY, 10, maxY);
@@ -711,9 +527,7 @@
   secretBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     if(boxOpened) return;
-    if(!movedOnce){
-      markMoved();
-    }
+    if(!movedOnce) markMoved();
     if(keyRevealed) return;
 
     keyRevealed = true;
@@ -721,6 +535,7 @@
     status.textContent = "🔑 المفتاح طلع… اضغطه وخذه";
   });
 
+  // pick key -> open box
   key.addEventListener("click", () => {
     if(!keyRevealed || keyPicked) return;
     keyPicked = true;
@@ -742,7 +557,7 @@
     }, 900);
   }
 
-  // ===== envelope interactions =====
+  // envelope interactions
   const envScene = document.getElementById("envScene");
   const seal = document.getElementById("seal");
   const openInside = document.getElementById("openInside");
@@ -758,7 +573,6 @@
     envScene.classList.toggle("innerOpen");
   });
 
-  // hide envelope stage until box opened
   envStage.style.display = "none";
 </script>
 
